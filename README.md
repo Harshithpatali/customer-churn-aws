@@ -48,6 +48,10 @@ The frontend calls the backend through `BACKEND_URL`. Both components are indepe
 - Unit tests
 - CI workflow
 
+## Production upgrade roadmap
+
+See `docs/PRODUCTION_UPGRADE_PLAN.md` for the staged merge plan that preserves the existing AWS ECS CI/CD setup while adding data engineering, statistical modeling, ML experimentation, SHAP explainability, testing and modern UI layers.
+
 ## Dataset
 
 Official source:
