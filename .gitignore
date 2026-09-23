@@ -6,3 +6,9 @@ __pycache__/
 .DS_Store
 *.log
 data/processed/*.csv
+
+# Generated DS artifacts
+data/processed/*.csv
+reports/*.csv
+reports/*.json
+.ipynb_checkpoints/

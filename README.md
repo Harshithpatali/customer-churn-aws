@@ -48,6 +48,52 @@ The frontend calls the backend through `BACKEND_URL`. Both components are indepe
 - Unit tests
 - CI workflow
 
+## Production Data Science Architecture
+
+The project now separates the data/training plane from the online serving plane:
+
+```text
+Raw Telco CSV
+    |
+    +--> Data quality + deterministic feature pipeline
+    |           |
+    |           +--> processed/model_ready.csv
+    |
+    +--> Statistical inference
+    |           +--> chi-square
+    |           +--> Mann-Whitney U
+    |           +--> logistic odds ratios / CI / AIC / BIC
+    |
+    +--> ML experimentation
+                +--> Logistic Regression
+                +--> Random Forest
+                +--> XGBoost
+                +--> 5-fold CV + randomized search
+                +--> business threshold optimization
+                            |
+                            v
+                    versioned model artifact
+                            |
+                            v
+                    FastAPI model service
+                       /predict /explain
+                       /batch-predict
+                            |
+                            v
+                     Streamlit decision UI
+```
+
+### Reproducible commands
+
+```bash
+python scripts/run_pipeline.py
+python scripts/statistical_analysis.py
+python scripts/explainability.py
+pytest -q
+```
+
+The existing AWS ECS GitHub Actions workflows and Dockerfiles are intentionally kept unchanged by this upgrade.
+
 ## Production upgrade roadmap
 
 See `docs/PRODUCTION_UPGRADE_PLAN.md` for the staged merge plan that preserves the existing AWS ECS CI/CD setup while adding data engineering, statistical modeling, ML experimentation, SHAP explainability, testing and modern UI layers.
