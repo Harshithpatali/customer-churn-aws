@@ -1,10 +1,23 @@
-from pathlib import Path
-import sys
-ROOT=Path(__file__).resolve().parents[2]
-sys.path.insert(0,str(ROOT))
-from services.data_pipeline.pipeline import build_dataset
+from __future__ import annotations
 
-if __name__=="__main__":
-    output=ROOT/"data/processed/model_ready.csv"; output.parent.mkdir(parents=True,exist_ok=True)
-    df=build_dataset(ROOT/"data/raw/Telco-Customer-Churn.csv",ROOT/"reports/data_quality.json")
-    df.to_csv(output,index=False); print(f"saved {output} shape={df.shape}")
+import argparse
+from pathlib import Path
+
+from .pipeline import build_dataset
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Run the churn data pipeline.")
+    parser.add_argument("--input", type=Path, default=Path("data/raw/Telco-Customer-Churn.csv"))
+    parser.add_argument("--output", type=Path, default=Path("data/processed/model_ready.csv"))
+    parser.add_argument("--report", type=Path, default=Path("reports/data_quality.json"))
+    args = parser.parse_args()
+
+    df = build_dataset(args.input, args.report)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(args.output, index=False)
+    print(f"Saved {len(df):,} rows to {args.output}")
+
+
+if __name__ == "__main__":
+    main()
