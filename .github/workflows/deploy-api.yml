@@ -48,15 +48,61 @@ jobs:
           docker push $REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/$ECR_REPOSITORY:latest
 
-      - name: Force ECS deployment
+      - name: Deploy to ECS Express Mode
+        env:
+          AWS_ACCOUNT_ID: "870140859723"
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          aws ecs update-service \
-            --cluster "$ECS_CLUSTER" \
-            --service "$ECS_SERVICE" \
-            --force-new-deployment
+          IMAGE_DIGEST=$(aws ecr describe-images \
+            --repository-name "$ECR_REPOSITORY" \
+            --image-ids imageTag="$IMAGE_TAG" \
+            --query 'imageDetails[0].imageDigest' \
+            --output text)
 
-      - name: Wait for ECS deployment
+          IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}@${IMAGE_DIGEST}"
+
+          echo "Deploying image:"
+          echo "$IMAGE_URI"
+
+          aws ecs update-express-gateway-service \
+            --service-arn "arn:aws:ecs:${AWS_REGION}:${AWS_ACCOUNT_ID}:service/default/${ECS_SERVICE}" \
+            --region "$AWS_REGION" \
+            --primary-container "{\"image\":\"${IMAGE_URI}\"}"
+
+      - name: Verify ECS Express Mode deployment
+        env:
+          AWS_ACCOUNT_ID: "870140859723"
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          aws ecs wait services-stable \
-            --cluster "$ECS_CLUSTER" \
-            --services "$ECS_SERVICE"
+          IMAGE_DIGEST=$(aws ecr describe-images \
+            --repository-name "$ECR_REPOSITORY" \
+            --image-ids imageTag="$IMAGE_TAG" \
+            --query 'imageDetails[0].imageDigest' \
+            --output text)
+
+          EXPECTED_IMAGE="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}@${IMAGE_DIGEST}"
+
+          echo "Expected active image:"
+          echo "$EXPECTED_IMAGE"
+
+          for i in {1..30}; do
+            ACTIVE_IMAGE=$(aws ecs describe-express-gateway-service \
+              --service-arn "arn:aws:ecs:${AWS_REGION}:${AWS_ACCOUNT_ID}:service/default/${ECS_SERVICE}" \
+              --region "$AWS_REGION" \
+              --query 'service.activeConfigurations[0].primaryContainer.image' \
+              --output text)
+
+            echo "Active image:"
+            echo "$ACTIVE_IMAGE"
+
+            if [ "$ACTIVE_IMAGE" = "$EXPECTED_IMAGE" ]; then
+              echo "ECS Express Mode deployment verified successfully."
+              exit 0
+            fi
+
+            echo "Waiting for ECS Express Mode to activate the new revision..."
+            sleep 10
+          done
+
+          echo "ERROR: ECS Express Mode deployment verification timed out."
+          exit 1
