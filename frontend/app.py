@@ -9,6 +9,10 @@ import requests
 import streamlit as st
 
 
+# ============================================================
+# CONFIG
+# ============================================================
+
 BACKEND_URL = os.getenv(
     "BACKEND_URL",
     "http://localhost:8000",
@@ -22,94 +26,209 @@ TIMEOUT = int(
 )
 
 
+# ============================================================
+# PAGE CONFIG
+# ============================================================
+
 st.set_page_config(
-    page_title="Churn Intelligence",
-    page_icon="◈",
+    page_title="Customer Churn Intelligence",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
+    menu_items={
+        "About": (
+            "Customer Churn Intelligence — "
+            "Statistical inference · Predictive modeling · "
+            "Explainable ML · Retention analytics"
+        ),
+    },
 )
 
+
+# ============================================================
+# THEME
+# ============================================================
 
 st.markdown(
     """
 <style>
 
-/* ============================================================
-   BASE
-   ============================================================ */
+/* ------------------------------------------------------------
+   SAFETY: never hide the sidebar or its toggle
+   ------------------------------------------------------------ */
 
-#MainMenu,
-footer,
-header [data-testid="stToolbar"] {
-    visibility: hidden;
+/* Hide only the toolbar/menu chrome, NOT the sidebar toggle */
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+header [data-testid="stToolbar"] { visibility: hidden; }
+header [data-testid="stStatusWidget"] { visibility: hidden; }
+
+/* Force sidebar + its collapsed control to stay visible */
+[data-testid="stSidebar"],
+[data-testid="stSidebarContent"],
+[data-testid="stSidebarNav"],
+[data-testid="collapsedControl"],
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="stSidebarCollapseButton"] {
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: revert !important;
+    z-index: 9999 !important;
 }
 
-html, body, [class*="css"] {
-    font-feature-settings: "cv11", "ss01";
-    -webkit-font-smoothing: antialiased;
+[data-testid="collapsedControl"] button,
+[data-testid="stSidebarCollapsedControl"] button,
+[data-testid="stSidebarCollapseButton"] button {
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: inline-flex !important;
 }
 
-.block-container {
-    padding-top: 1.75rem;
-    padding-bottom: 3rem;
-    max-width: 1500px;
-}
-
-/* ============================================================
-   THEME TOKENS
-   ============================================================ */
+/* ------------------------------------------------------------
+   DESIGN TOKENS
+   ------------------------------------------------------------ */
 
 :root {
-    --card-bg: #ffffff;
-    --card-bg-soft: #f8fafc;
-    --card-border: #e2e8f0;
-    --card-border-strong: #cbd5e1;
-    --card-text: #0f172a;
-    --card-muted: #64748b;
-    --card-shadow: 0 1px 2px rgba(15,23,42,.04),
-                   0 8px 24px rgba(15,23,42,.06);
-    --card-shadow-hover: 0 2px 4px rgba(15,23,42,.06),
-                         0 14px 34px rgba(15,23,42,.10);
-    --accent: #6366f1;
-    --accent-soft: rgba(99,102,241,.10);
-    --radius-lg: 20px;
-    --radius-md: 14px;
-    --radius-sm: 10px;
+    --bg-0: #f6f8fc;
+    --bg-1: #ffffff;
+    --bg-2: #f1f5f9;
+
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+    --surface-inset: #f1f5f9;
+
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+
+    --text: #0b1220;
+    --text-soft: #334155;
+    --muted: #64748b;
+    --muted-2: #94a3b8;
+
+    --brand: #6366f1;
+    --brand-2: #8b5cf6;
+    --brand-3: #38bdf8;
+    --brand-soft: rgba(99,102,241,.10);
+    --brand-softer: rgba(99,102,241,.06);
+
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger:  #f43f5e;
+    --info:    #0ea5e9;
+
+    --radius-xl: 22px;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 9px;
+
+    --shadow-1: 0 1px 2px rgba(15,23,42,.05),
+                0 6px 20px rgba(15,23,42,.06);
+    --shadow-2: 0 2px 4px rgba(15,23,42,.06),
+                0 16px 40px rgba(15,23,42,.10);
+    --shadow-inset:
+        inset 0 1px 0 rgba(255,255,255,.7),
+        inset 0 -1px 0 rgba(15,23,42,.04);
+
+    --mono: ui-monospace, SFMono-Regular, "JetBrains Mono",
+            "Fira Code", Menlo, Consolas, monospace;
+    --sans: "Inter", ui-sans-serif, system-ui, -apple-system,
+            "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --card-bg: #1a1f2e;
-        --card-bg-soft: #232838;
-        --card-border: #2d3446;
-        --card-border-strong: #3a4257;
-        --card-text: #f1f5f9;
-        --card-muted: #94a3b8;
-        --card-shadow: 0 1px 2px rgba(0,0,0,.25),
-                       0 8px 24px rgba(0,0,0,.35);
-        --card-shadow-hover: 0 2px 4px rgba(0,0,0,.35),
-                             0 14px 34px rgba(0,0,0,.45);
+        --bg-0: #0b0f1a;
+        --bg-1: #0f1524;
+        --bg-2: #131a2b;
+
+        --surface: #141b2d;
+        --surface-soft: #1a2236;
+        --surface-inset: #0f1524;
+
+        --border: #26304a;
+        --border-strong: #364264;
+
+        --text: #f1f5f9;
+        --text-soft: #cbd5e1;
+        --muted: #94a3b8;
+        --muted-2: #64748b;
+
+        --brand-soft: rgba(99,102,241,.18);
+        --brand-softer: rgba(99,102,241,.10);
+
+        --shadow-1: 0 1px 2px rgba(0,0,0,.35),
+                    0 6px 20px rgba(0,0,0,.35);
+        --shadow-2: 0 2px 4px rgba(0,0,0,.45),
+                    0 16px 40px rgba(0,0,0,.55);
+        --shadow-inset:
+            inset 0 1px 0 rgba(255,255,255,.04),
+            inset 0 -1px 0 rgba(0,0,0,.35);
     }
 }
 
-/* ============================================================
+/* ------------------------------------------------------------
+   BASE
+   ------------------------------------------------------------ */
+
+html, body, [class*="css"], .stApp {
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "cv11", "ss01", "tnum";
+}
+
+.stApp {
+    background:
+        radial-gradient(1200px 600px at -10% -10%,
+            rgba(99,102,241,.06), transparent 60%),
+        radial-gradient(1000px 500px at 110% 0%,
+            rgba(56,189,248,.06), transparent 55%),
+        var(--bg-0);
+}
+
+.block-container {
+    padding-top: 1.5rem;
+    padding-bottom: 3.5rem;
+    max-width: 1500px;
+}
+
+html { scroll-behavior: smooth; }
+
+/* Custom scrollbars */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+    background: var(--brand);
+    background-clip: padding-box;
+    border: 2px solid transparent;
+}
+
+/* ------------------------------------------------------------
    HERO
-   ============================================================ */
+   ------------------------------------------------------------ */
 
 .hero {
     position: relative;
     overflow: hidden;
-    padding: 38px 42px;
-    border-radius: 26px;
-    margin-bottom: 28px;
+    padding: 44px 48px;
+    border-radius: 28px;
+    margin-bottom: 26px;
     background:
-        radial-gradient(120% 140% at 0% 0%, rgba(99,102,241,.35) 0%, transparent 55%),
-        radial-gradient(120% 140% at 100% 100%, rgba(56,189,248,.20) 0%, transparent 55%),
+        radial-gradient(120% 160% at 0% 0%,
+            rgba(99,102,241,.45) 0%, transparent 55%),
+        radial-gradient(120% 160% at 100% 100%,
+            rgba(56,189,248,.28) 0%, transparent 55%),
         linear-gradient(135deg, #0b1220 0%, #1e293b 55%, #334155 100%);
     box-shadow:
-        0 24px 60px rgba(15,23,42,.20),
-        inset 0 1px 0 rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.05);
+        0 30px 70px rgba(15,23,42,.28),
+        inset 0 1px 0 rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.06);
 }
 
 .hero::after {
@@ -117,287 +236,426 @@ html, body, [class*="css"] {
     position: absolute;
     inset: 0;
     background-image:
-        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
-    background-size: 44px 44px;
-    mask-image: radial-gradient(120% 120% at 20% 0%, black 0%, transparent 70%);
-    -webkit-mask-image: radial-gradient(120% 120% at 20% 0%, black 0%, transparent 70%);
+        linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(120% 120% at 20% 0%, black 0%, transparent 72%);
+    -webkit-mask-image: radial-gradient(120% 120% at 20% 0%, black 0%, transparent 72%);
     pointer-events: none;
 }
 
+.hero-eyebrow {
+    position: relative; z-index: 1;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: #a5b4fc;
+    background: rgba(99,102,241,.16);
+    border: 1px solid rgba(165,180,252,.28);
+    padding: 6px 12px;
+    border-radius: 999px;
+    margin-bottom: 16px;
+}
+
+.hero-eyebrow::before {
+    content: "";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #38bdf8;
+    box-shadow: 0 0 12px #38bdf8;
+}
+
 .hero h1 {
-    position: relative;
-    z-index: 1;
+    position: relative; z-index: 1;
     color: #ffffff;
-    font-size: clamp(1.9rem, 3vw, 2.7rem);
-    font-weight: 750;
+    font-size: clamp(1.9rem, 3vw, 2.75rem);
+    font-weight: 780;
     margin: 0;
-    letter-spacing: -1.1px;
-    line-height: 1.1;
+    letter-spacing: -1.2px;
+    line-height: 1.08;
 }
 
 .hero p {
-    position: relative;
-    z-index: 1;
+    position: relative; z-index: 1;
     color: #cbd5e1;
-    margin-top: 10px;
+    margin-top: 12px;
+    margin-bottom: 0;
     font-size: 1.02rem;
     letter-spacing: .2px;
+    max-width: 780px;
 }
 
-/* ============================================================
-   TYPOGRAPHY
-   ============================================================ */
+.hero-chips {
+    position: relative; z-index: 1;
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 22px;
+}
+.hero-chip {
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .08em;
+    color: #e2e8f0;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    padding: 5px 10px;
+    border-radius: 8px;
+}
+
+/* ------------------------------------------------------------
+   SECTION TITLES
+   ------------------------------------------------------------ */
 
 .section-title {
-    font-size: 1.4rem;
-    font-weight: 700;
+    font-size: 1.28rem;
+    font-weight: 720;
     letter-spacing: -0.4px;
-    margin-top: 14px;
-    margin-bottom: 14px;
-    color: var(--card-text);
+    margin: 18px 0 14px 0;
+    color: var(--text);
     display: flex;
     align-items: center;
     gap: 10px;
 }
-
 .section-title::before {
     content: "";
     display: inline-block;
-    width: 4px;
-    height: 20px;
+    width: 4px; height: 20px;
     border-radius: 3px;
-    background: linear-gradient(180deg, #6366f1, #38bdf8);
+    background: linear-gradient(180deg, var(--brand), var(--brand-3));
+    box-shadow: 0 0 12px rgba(99,102,241,.35);
 }
 
 h3 {
     letter-spacing: -0.3px;
-    font-weight: 680;
+    font-weight: 700;
+    color: var(--text);
 }
 
-/* ============================================================
-   METRIC CARDS — theme-safe
-   ============================================================ */
+/* ------------------------------------------------------------
+   METRIC CARDS (st.metric)
+   ------------------------------------------------------------ */
 
 [data-testid="stMetric"] {
-    background: var(--card-bg) !important;
-    border: 1px solid var(--card-border) !important;
-    border-radius: var(--radius-lg) !important;
-    padding: 18px 20px !important;
-    box-shadow: var(--card-shadow) !important;
+    background:
+        linear-gradient(180deg,
+            color-mix(in srgb, var(--surface) 100%, transparent),
+            color-mix(in srgb, var(--surface-soft) 100%, transparent));
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    box-shadow: var(--shadow-1), var(--shadow-inset);
     transition: transform .18s ease, box-shadow .18s ease,
                 border-color .18s ease;
-    color: var(--card-text) !important;
+    color: var(--text);
     overflow: hidden;
+    position: relative;
+}
+
+[data-testid="stMetric"]::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg,
+        var(--brand), var(--brand-3), transparent);
+    opacity: .55;
 }
 
 [data-testid="stMetric"]:hover {
     transform: translateY(-2px);
-    box-shadow: var(--card-shadow-hover) !important;
-    border-color: var(--card-border-strong) !important;
+    box-shadow: var(--shadow-2);
+    border-color: var(--border-strong);
 }
 
 [data-testid="stMetricValue"],
 [data-testid="stMetricValue"] > div,
 [data-testid="stMetricValue"] * {
-    color: var(--card-text) !important;
+    color: var(--text) !important;
     opacity: 1 !important;
-    font-weight: 700 !important;
-    letter-spacing: -0.6px;
+    font-weight: 760 !important;
+    letter-spacing: -0.7px;
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
 }
 
 [data-testid="stMetricLabel"],
 [data-testid="stMetricLabel"] *,
 [data-testid="stMetricLabel"] p {
-    color: var(--card-muted) !important;
+    color: var(--muted) !important;
     opacity: 1 !important;
-    font-weight: 550 !important;
-    font-size: .85rem !important;
+    font-weight: 620 !important;
+    font-size: .74rem !important;
     text-transform: uppercase;
-    letter-spacing: .6px;
+    letter-spacing: .14em;
 }
 
 [data-testid="stMetricDelta"],
 [data-testid="stMetricDelta"] * {
     opacity: 1 !important;
+    font-family: var(--mono);
 }
 
-.metric-card {
-    padding: 18px 20px;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--card-border);
-    background: var(--card-bg);
-    color: var(--card-text);
-    box-shadow: var(--card-shadow);
-}
-
-/* ============================================================
-   RISK BANNERS — theme-safe
-   ============================================================ */
+/* ------------------------------------------------------------
+   RISK BANNERS
+   ------------------------------------------------------------ */
 
 .risk-high,
 .risk-medium,
 .risk-low {
     padding: 16px 20px;
     border-radius: var(--radius-md);
-    color: var(--card-text);
+    color: var(--text);
     font-size: .98rem;
     line-height: 1.55;
-    box-shadow: var(--card-shadow);
+    box-shadow: var(--shadow-1);
+    margin-top: 12px;
 }
 
 .risk-high strong,
 .risk-medium strong,
 .risk-low strong {
-    color: var(--card-text);
-    font-weight: 700;
+    color: var(--text);
+    font-weight: 750;
+    letter-spacing: -0.2px;
 }
 
 .risk-high {
-    background: #fff1f2;
+    background: linear-gradient(180deg, #fff1f2, #ffe4e6);
     border: 1px solid #fecdd3;
-    border-left: 4px solid #f43f5e;
+    border-left: 4px solid var(--danger);
 }
-
 .risk-medium {
-    background: #fffbeb;
+    background: linear-gradient(180deg, #fffbeb, #fef3c7);
     border: 1px solid #fde68a;
-    border-left: 4px solid #f59e0b;
+    border-left: 4px solid var(--warning);
 }
-
 .risk-low {
-    background: #f0fdf4;
+    background: linear-gradient(180deg, #f0fdf4, #dcfce7);
     border: 1px solid #bbf7d0;
-    border-left: 4px solid #22c55e;
+    border-left: 4px solid var(--success);
 }
 
-/* ============================================================
+@media (prefers-color-scheme: dark) {
+    .risk-high   { background: rgba(244,63,94,.12);  border-color: rgba(244,63,94,.35); }
+    .risk-medium { background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.35); }
+    .risk-low    { background: rgba(16,185,129,.12); border-color: rgba(16,185,129,.35); }
+}
+
+/* ------------------------------------------------------------
    SIDEBAR
-   ============================================================ */
+   ------------------------------------------------------------ */
 
 [data-testid="stSidebar"] {
-    border-right: 1px solid var(--card-border);
+    background:
+        linear-gradient(180deg,
+            color-mix(in srgb, var(--surface) 96%, transparent),
+            color-mix(in srgb, var(--surface-soft) 96%, transparent));
+    border-right: 1px solid var(--border);
 }
 
 [data-testid="stSidebar"] > div:first-child {
-    padding-top: 1.5rem;
+    padding-top: 1.25rem;
+}
+
+[data-testid="stSidebar"] h2 {
+    font-size: 1.05rem;
+    letter-spacing: -0.3px;
+    font-weight: 760;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    color: var(--text);
+}
+
+[data-testid="stSidebar"] hr {
+    margin: 12px 0;
+    border-color: var(--border);
 }
 
 [data-testid="stSidebar"] .stRadio > label {
     font-weight: 700;
-    letter-spacing: .3px;
+    letter-spacing: .16em;
     text-transform: uppercase;
-    font-size: .78rem;
-    color: var(--card-muted);
+    font-size: .68rem;
+    color: var(--muted);
 }
 
 [data-testid="stSidebar"] .stRadio label {
     border-radius: var(--radius-sm);
-    padding: 6px 10px;
-    transition: background .15s ease;
+    padding: 8px 10px;
+    transition: background .15s ease, color .15s ease;
+    font-weight: 550;
+    color: var(--text-soft);
 }
 
 [data-testid="stSidebar"] .stRadio label:hover {
-    background: var(--accent-soft);
-}
-[data-testid="collapsedControl"] {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    z-index: 999999 !important;
+    background: var(--brand-softer);
+    color: var(--text);
 }
 
-
-[data-testid="collapsedControl"] button {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+[data-testid="stSidebar"] .stRadio [aria-checked="true"] ~ div,
+[data-testid="stSidebar"] .stRadio input:checked + div {
+    color: var(--brand);
+    font-weight: 700;
 }
 
-/* ============================================================
+/* Sidebar brand block */
+.sb-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-soft);
+    margin-bottom: 6px;
+}
+.sb-brand-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand), var(--brand-3));
+    box-shadow: 0 0 12px rgba(99,102,241,.55);
+}
+.sb-brand-text {
+    font-family: var(--mono);
+    font-size: .74rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+/* ------------------------------------------------------------
    WIDGETS
-   ============================================================ */
+   ------------------------------------------------------------ */
 
-[data-testid="stFileUploader"] {
-    border-radius: var(--radius-lg);
-}
+[data-testid="stFileUploader"] { border-radius: var(--radius-lg); }
 
 [data-testid="stFileUploader"] section {
     border-radius: var(--radius-lg);
-    border: 1.5px dashed var(--card-border-strong);
+    border: 1.5px dashed var(--border-strong);
+    background: var(--surface-soft);
     transition: border-color .18s ease, background .18s ease;
 }
-
 [data-testid="stFileUploader"] section:hover {
-    border-color: var(--accent);
-    background: var(--accent-soft);
+    border-color: var(--brand);
+    background: var(--brand-softer);
 }
 
 div.stButton > button,
 div.stDownloadButton > button,
 div[data-testid="stFormSubmitButton"] > button {
     border-radius: var(--radius-sm);
-    font-weight: 650;
-    letter-spacing: .2px;
-    transition: transform .12s ease, box-shadow .18s ease;
+    font-weight: 680;
+    letter-spacing: .02em;
+    border: 1px solid var(--border);
+    transition: transform .12s ease, box-shadow .18s ease,
+                border-color .18s ease, background .18s ease;
 }
 
 div.stButton > button:hover,
 div.stDownloadButton > button:hover,
 div[data-testid="stFormSubmitButton"] > button:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(15,23,42,.12);
+    border-color: var(--brand);
+    box-shadow: 0 10px 24px rgba(99,102,241,.20);
 }
 
 div[data-testid="stForm"] {
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-lg);
-    padding: 20px 22px;
-    background: var(--card-bg);
-    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 22px 24px;
+    background: var(--surface);
+    box-shadow: var(--shadow-1), var(--shadow-inset);
 }
 
 .stTextInput input,
 .stNumberInput input,
 .stSelectbox div[data-baseweb="select"] > div {
     border-radius: var(--radius-sm) !important;
+    background: var(--surface-soft) !important;
+    border-color: var(--border) !important;
 }
 
-/* ============================================================
-   TABS, DATAFRAMES, ALERTS
-   ============================================================ */
+/* ------------------------------------------------------------
+   TABS / DATAFRAMES / ALERTS / CHARTS
+   ------------------------------------------------------------ */
 
 .stTabs [data-baseweb="tab-list"] {
     gap: 4px;
-    border-bottom: 1px solid var(--card-border);
+    border-bottom: 1px solid var(--border);
 }
 
 .stTabs [data-baseweb="tab"] {
     border-radius: var(--radius-sm) var(--radius-sm) 0 0;
     padding: 10px 16px;
-    font-weight: 600;
+    font-weight: 650;
+    color: var(--muted);
 }
-
-.stTabs [aria-selected="true"] {
-    background: var(--accent-soft);
+.stTabs [data-baseweb="tab"][aria-selected="true"] {
+    background: var(--brand-soft);
+    color: var(--brand);
 }
 
 [data-testid="stDataFrame"] {
     border-radius: var(--radius-md);
     overflow: hidden;
-    border: 1px solid var(--card-border);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-1);
 }
 
 [data-testid="stAlert"] {
     border-radius: var(--radius-md);
+    border: 1px solid var(--border);
 }
 
 [data-testid="stPlotlyChart"] {
     border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: 6px;
+    background: var(--surface);
+    box-shadow: var(--shadow-1);
 }
 
-html {
-    scroll-behavior: smooth;
+/* Captions */
+[data-testid="stCaptionContainer"],
+.stCaption, small {
+    color: var(--muted) !important;
+}
+
+/* Divider */
+hr {
+    border-color: var(--border) !important;
+}
+
+/* Metric row spacing under headers */
+.metric-row {
+    margin-top: 6px;
+    margin-bottom: 4px;
+}
+
+/* Small helper card */
+.mini-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    box-shadow: var(--shadow-1);
+    color: var(--text);
+    font-size: .92rem;
+    line-height: 1.5;
+}
+.mini-card .k {
+    font-family: var(--mono);
+    color: var(--muted);
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+.mini-card .v {
+    font-family: var(--mono);
+    color: var(--text);
+    font-weight: 700;
+    font-size: 1rem;
 }
 
 </style>
@@ -406,60 +664,38 @@ html {
 )
 
 
+# ============================================================
+# API HELPERS (unchanged contract)
+# ============================================================
+
 def api(
     method: str,
     path: str,
     **kwargs,
 ):
-
     response = requests.request(
         method,
         f"{BACKEND_URL}{path}",
         timeout=TIMEOUT,
         **kwargs,
     )
-
     response.raise_for_status()
-
     return response.json()
 
 
 def cv_info(metrics):
-
-    cv = metrics.get(
-        "cv",
-        {},
-    )
-
-    models = cv.get(
-        "models",
-        {},
-    )
-
-    tuned = models.get(
-        "xgboost_tuned",
-        {},
-    )
-
+    cv = metrics.get("cv", {})
+    models = cv.get("models", {})
+    tuned = models.get("xgboost_tuned", {})
     return tuned
 
 
-def render_risk(
-    probability,
-    band,
-):
-
+def render_risk(probability, band):
     css = {
-        "High":
-            "risk-high",
-        "Medium":
-            "risk-medium",
-        "Low":
-            "risk-low",
-    }.get(
-        band,
-        "risk-low",
-    )
+        "High": "risk-high",
+        "Medium": "risk-medium",
+        "Low": "risk-low",
+    }.get(band, "risk-low")
 
     st.markdown(
         f"""
@@ -473,68 +709,85 @@ def render_risk(
     )
 
 
+# ============================================================
+# HEALTH CHECK
+# ============================================================
+
 try:
-
-    health = api(
-        "GET",
-        "/health",
-    )
-
+    health = api("GET", "/health")
     api_online = True
-
 except Exception as exc:
-
     api_online = False
+    st.error(f"Backend unavailable: {exc}")
 
-    st.error(
-        f"Backend unavailable: {exc}"
-    )
 
+# ============================================================
+# HERO
+# ============================================================
 
 st.markdown(
     """
 <div class="hero">
-
-<h1>Customer Churn Intelligence</h1>
-
-<p>
-Statistical inference • Predictive modeling •
-Explainable ML • Retention analytics
-</p>
-
+    <div class="hero-eyebrow">ML Console · v3.0</div>
+    <h1>Customer Churn Intelligence</h1>
+    <p>
+        Statistical inference · Predictive modeling ·
+        Explainable ML · Retention analytics
+    </p>
+    <div class="hero-chips">
+        <span class="hero-chip">XGBoost</span>
+        <span class="hero-chip">SHAP</span>
+        <span class="hero-chip">Cross-Validation</span>
+        <span class="hero-chip">Threshold Tuning</span>
+        <span class="hero-chip">Batch Scoring</span>
+    </div>
 </div>
 """,
     unsafe_allow_html=True,
 )
 
 
-st.sidebar.markdown(
-    "## Intelligence Workspace"
-)
+# ============================================================
+# SIDEBAR NAV
+# ============================================================
 
-page = st.sidebar.radio(
-    "Navigate",
-    [
-        "Executive Overview",
-        "Statistical Evidence",
-        "Customer 360",
-        "SHAP Explainability",
-        "Batch Scoring",
-        "Model Governance",
-    ],
-)
+with st.sidebar:
 
-
-if api_online:
-
-    st.sidebar.success(
-        "API ONLINE"
+    st.markdown(
+        """
+        <div class="sb-brand">
+            <div class="sb-brand-dot"></div>
+            <div class="sb-brand-text">Churn Intelligence</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-else:
+    st.markdown("## Intelligence Workspace")
 
-    st.sidebar.error(
-        "API OFFLINE"
+    page = st.radio(
+        "Navigate",
+        [
+            "Executive Overview",
+            "Statistical Evidence",
+            "Customer 360",
+            "SHAP Explainability",
+            "Batch Scoring",
+            "Model Governance",
+        ],
+        label_visibility="collapsed",
+    )
+
+    st.markdown("---")
+
+    if api_online:
+        st.success("API ONLINE")
+    else:
+        st.error("API OFFLINE")
+
+    st.caption(
+        f"Backend: `{BACKEND_URL}`  \n"
+        f"Timeout: `{TIMEOUT}s`"
     )
 
 
@@ -544,12 +797,14 @@ else:
 
 if page == "Executive Overview":
 
-    metrics = api(
-        "GET",
-        "/metrics",
-    )
+    metrics = api("GET", "/metrics")
 
     test = metrics["test"]
+
+    st.markdown(
+        '<div class="section-title">Key performance indicators</div>',
+        unsafe_allow_html=True,
+    )
 
     columns = st.columns(6)
 
@@ -557,27 +812,22 @@ if page == "Executive Overview":
         "Customers",
         f"{metrics['dataset_rows']:,}",
     )
-
     columns[1].metric(
         "Churn rate",
         f"{metrics['churn_rate']:.1%}",
     )
-
     columns[2].metric(
         "ROC-AUC",
         f"{test['roc_auc']:.3f}",
     )
-
     columns[3].metric(
         "PR-AUC",
         f"{test['pr_auc']:.3f}",
     )
-
     columns[4].metric(
         "Recall",
         f"{test['recall']:.1%}",
     )
-
     columns[5].metric(
         "Brier score",
         f"{test.get('brier_score', 0):.3f}",
@@ -589,100 +839,67 @@ if page == "Executive Overview":
     )
 
     comparison = (
-        pd.DataFrame(
-            metrics["comparison"]
-        )
+        pd.DataFrame(metrics["comparison"])
         .T
-        .reset_index(
-            names="model"
-        )
+        .reset_index(names="model")
     )
 
     chart = px.bar(
         comparison,
         x="model",
-        y=[
-            "roc_auc",
-            "pr_auc",
-        ],
+        y=["roc_auc", "pr_auc"],
         barmode="group",
         template="plotly_white",
-        labels={
-            "value":
-                "Score",
-            "model":
-                "Model",
-        },
+        labels={"value": "Score", "model": "Model"},
+        color_discrete_sequence=["#6366f1", "#38bdf8"],
     )
 
     chart.update_layout(
         legend_title="Metric",
-        margin=dict(
-            l=10,
-            r=10,
-            t=20,
-            b=10,
-        ),
+        margin=dict(l=10, r=10, t=20, b=10),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
     )
 
-    st.plotly_chart(
-        chart,
-        use_container_width=True,
-    )
+    st.plotly_chart(chart, use_container_width=True)
 
     left, right = st.columns(2)
 
     with left:
 
-        st.markdown(
-            "### Cross-validation"
-        )
+        st.markdown("### Cross-validation")
 
-        tuned = cv_info(
-            metrics
-        )
+        tuned = cv_info(metrics)
 
         st.metric(
             "5-fold CV ROC-AUC",
-            (
-                f"{tuned.get('roc_auc_mean', 0):.3f}"
-                f" ± "
-                f"{tuned.get('roc_auc_std', 0):.3f}"
-            ),
+            f"{tuned.get('roc_auc_mean', 0):.3f}"
+            f" ± "
+            f"{tuned.get('roc_auc_std', 0):.3f}",
         )
-
         st.metric(
             "5-fold CV PR-AUC",
-            (
-                f"{tuned.get('pr_auc_mean', 0):.3f}"
-                f" ± "
-                f"{tuned.get('pr_auc_std', 0):.3f}"
-            ),
+            f"{tuned.get('pr_auc_mean', 0):.3f}"
+            f" ± "
+            f"{tuned.get('pr_auc_std', 0):.3f}",
         )
 
     with right:
 
-        st.markdown(
-            "### Decision threshold"
-        )
+        st.markdown("### Decision threshold")
 
-        threshold = metrics[
-            "threshold_selection"
-        ]
+        threshold = metrics["threshold_selection"]
 
         st.metric(
             "Selected threshold",
             f"{threshold['threshold']:.2f}",
         )
-
         st.metric(
             "Business score",
             f"{threshold['business_score']:.3f}",
         )
 
-    st.markdown(
-        "### Risk distribution"
-    )
+    st.markdown("### Risk distribution")
 
     st.info(
         "Risk bands are generated from the model probability "
@@ -696,20 +913,10 @@ if page == "Executive Overview":
 
 elif page == "Statistical Evidence":
 
-    metrics = api(
-        "GET",
-        "/metrics",
-    )
+    metrics = api("GET", "/metrics")
 
-    statistical = metrics.get(
-        "statistical_model",
-        {},
-    )
-
-    summary = statistical.get(
-        "summary",
-        {},
-    )
+    statistical = metrics.get("statistical_model", {})
+    summary = statistical.get("summary", {})
 
     st.markdown(
         '<div class="section-title">Statistical evidence</div>',
@@ -722,29 +929,17 @@ elif page == "Statistical Evidence":
         "Sample size",
         f"{summary.get('sample_size', metrics['dataset_rows']):,}",
     )
-
     b.metric(
         "Categorical tests",
-        summary.get(
-            "categorical_tests",
-            0,
-        ),
+        summary.get("categorical_tests", 0),
     )
-
     c.metric(
         "Numeric tests",
-        summary.get(
-            "numeric_tests",
-            0,
-        ),
+        summary.get("numeric_tests", 0),
     )
-
     d.metric(
         "Significant logit terms",
-        summary.get(
-            "logit_significant_terms",
-            0,
-        ),
+        summary.get("logit_significant_terms", 0),
     )
 
     st.caption(
@@ -753,24 +948,13 @@ elif page == "Statistical Evidence":
     )
 
     categorical = pd.DataFrame(
-        statistical.get(
-            "categorical_tests",
-            [],
-        )
+        statistical.get("categorical_tests", [])
     )
-
     numeric = pd.DataFrame(
-        statistical.get(
-            "numeric_tests",
-            [],
-        )
+        statistical.get("numeric_tests", [])
     )
-
     odds = pd.DataFrame(
-        statistical.get(
-            "logistic_inference",
-            [],
-        )
+        statistical.get("logistic_inference", [])
     )
 
     tab1, tab2, tab3 = st.tabs(
@@ -798,12 +982,16 @@ elif page == "Statistical Evidence":
                 orientation="h",
                 template="plotly_white",
                 title="Effect size — Cramér's V",
+                color="cramers_v",
+                color_continuous_scale="Viridis",
+            )
+            chart.update_layout(
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                coloraxis_showscale=False,
             )
 
-            st.plotly_chart(
-                chart,
-                use_container_width=True,
-            )
+            st.plotly_chart(chart, use_container_width=True)
 
     with tab2:
 
@@ -822,36 +1010,25 @@ elif page == "Statistical Evidence":
                 orientation="h",
                 template="plotly_white",
                 title="Median difference between churn groups",
+                color="median_difference",
+                color_continuous_scale="RdBu_r",
+            )
+            chart.update_layout(
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                coloraxis_showscale=False,
             )
 
-            st.plotly_chart(
-                chart,
-                use_container_width=True,
-            )
+            st.plotly_chart(chart, use_container_width=True)
 
     with tab3:
 
         if not odds.empty:
 
             display = odds.copy()
-
-            display[
-                "odds_ratio"
-            ] = display[
-                "odds_ratio"
-            ].round(3)
-
-            display[
-                "ci_lower"
-            ] = display[
-                "ci_lower"
-            ].round(3)
-
-            display[
-                "ci_upper"
-            ] = display[
-                "ci_upper"
-            ].round(3)
+            display["odds_ratio"] = display["odds_ratio"].round(3)
+            display["ci_lower"] = display["ci_lower"].round(3)
+            display["ci_upper"] = display["ci_upper"].round(3)
 
             st.dataframe(
                 display,
@@ -877,88 +1054,39 @@ elif page == "Customer 360":
         unsafe_allow_html=True,
     )
 
-    with st.form(
-        "customer_form"
-    ):
+    with st.form("customer_form"):
 
         c1, c2, c3 = st.columns(3)
 
-        gender = c1.selectbox(
-            "Gender",
-            ["Female", "Male"],
-        )
+        gender = c1.selectbox("Gender", ["Female", "Male"])
+        senior = c2.selectbox("Senior Citizen", [0, 1])
+        tenure = c3.number_input("Tenure (months)", 0, 100, 12)
 
-        senior = c2.selectbox(
-            "Senior Citizen",
-            [0, 1],
-        )
-
-        tenure = c3.number_input(
-            "Tenure (months)",
-            0,
-            100,
-            12,
-        )
-
-        partner = c1.selectbox(
-            "Partner",
-            ["Yes", "No"],
-        )
-
-        dependents = c2.selectbox(
-            "Dependents",
-            ["Yes", "No"],
-        )
-
+        partner = c1.selectbox("Partner", ["Yes", "No"])
+        dependents = c2.selectbox("Dependents", ["Yes", "No"])
         contract = c3.selectbox(
             "Contract",
-            [
-                "Month-to-month",
-                "One year",
-                "Two year",
-            ],
+            ["Month-to-month", "One year", "Two year"],
         )
 
         internet = c1.selectbox(
             "Internet Service",
-            [
-                "DSL",
-                "Fiber optic",
-                "No",
-            ],
+            ["DSL", "Fiber optic", "No"],
         )
-
         monthly = c2.number_input(
-            "Monthly Charges",
-            0.0,
-            300.0,
-            70.0,
+            "Monthly Charges", 0.0, 300.0, 70.0
         )
-
         total = c3.number_input(
-            "Total Charges",
-            0.0,
-            20000.0,
-            800.0,
+            "Total Charges", 0.0, 20000.0, 800.0
         )
 
-        phone = c1.selectbox(
-            "Phone Service",
-            ["Yes", "No"],
-        )
-
+        phone = c1.selectbox("Phone Service", ["Yes", "No"])
         multiple = c2.selectbox(
             "Multiple Lines",
-            [
-                "Yes",
-                "No",
-                "No phone service",
-            ],
+            ["Yes", "No", "No phone service"],
         )
-
         paperless = c3.selectbox(
-            "Paperless Billing",
-            ["Yes", "No"],
+            "Paperless Billing", ["Yes", "No"]
         )
 
         payment = c1.selectbox(
@@ -970,59 +1098,31 @@ elif page == "Customer 360":
                 "Credit card (automatic)",
             ],
         )
-
         security = c2.selectbox(
             "Online Security",
-            [
-                "Yes",
-                "No",
-                "No internet service",
-            ],
+            ["Yes", "No", "No internet service"],
         )
-
         backup = c3.selectbox(
             "Online Backup",
-            [
-                "Yes",
-                "No",
-                "No internet service",
-            ],
+            ["Yes", "No", "No internet service"],
         )
 
         device = c1.selectbox(
             "Device Protection",
-            [
-                "Yes",
-                "No",
-                "No internet service",
-            ],
+            ["Yes", "No", "No internet service"],
         )
-
         support = c2.selectbox(
             "Tech Support",
-            [
-                "Yes",
-                "No",
-                "No internet service",
-            ],
+            ["Yes", "No", "No internet service"],
         )
-
         tv = c3.selectbox(
             "Streaming TV",
-            [
-                "Yes",
-                "No",
-                "No internet service",
-            ],
+            ["Yes", "No", "No internet service"],
         )
 
         movies = c1.selectbox(
             "Streaming Movies",
-            [
-                "Yes",
-                "No",
-                "No internet service",
-            ],
+            ["Yes", "No", "No internet service"],
         )
 
         submit = st.form_submit_button(
@@ -1057,11 +1157,7 @@ elif page == "Customer 360":
 
         try:
 
-            result = api(
-                "POST",
-                "/predict",
-                json=payload,
-            )
+            result = api("POST", "/predict", json=payload)
 
             a, b, c = st.columns(3)
 
@@ -1069,44 +1165,26 @@ elif page == "Customer 360":
                 "Churn probability",
                 f"{result['churn_probability']:.1%}",
             )
-
             b.metric(
                 "Risk band",
                 result["risk_band"],
             )
-
             c.metric(
                 "Revenue at risk",
-                (
-                    f"USD "
-                    f"{result['estimated_monthly_revenue_at_risk']:,.2f}"
-                ),
+                f"USD {result['estimated_monthly_revenue_at_risk']:,.2f}",
             )
 
             render_risk(
-                result[
-                    "churn_probability"
-                ],
-                result[
-                    "risk_band"
-                ],
+                result["churn_probability"],
+                result["risk_band"],
             )
 
-            st.markdown(
-                "### Retention intelligence"
-            )
-
-            st.info(
-                result[
-                    "recommendation"
-                ]
-            )
+            st.markdown("### Retention intelligence")
+            st.info(result["recommendation"])
 
         except Exception as exc:
 
-            st.error(
-                f"Prediction failed: {exc}"
-            )
+            st.error(f"Prediction failed: {exc}")
 
 
 # ============================================================
@@ -1125,9 +1203,7 @@ elif page == "SHAP Explainability":
         "negative values decrease it."
     )
 
-    with st.form(
-        "shap_form"
-    ):
+    with st.form("shap_form"):
 
         st.info(
             "Use the same customer profile fields as Customer 360."
@@ -1136,75 +1212,41 @@ elif page == "SHAP Explainability":
         c1, c2, c3 = st.columns(3)
 
         gender = c1.selectbox(
-            "Gender",
-            ["Female", "Male"],
-            key="shap_gender",
+            "Gender", ["Female", "Male"], key="shap_gender"
         )
-
         senior = c2.selectbox(
-            "Senior Citizen",
-            [0, 1],
-            key="shap_senior",
+            "Senior Citizen", [0, 1], key="shap_senior"
         )
-
         tenure = c3.number_input(
-            "Tenure",
-            0,
-            100,
-            12,
-            key="shap_tenure",
+            "Tenure", 0, 100, 12, key="shap_tenure"
         )
 
         contract = c1.selectbox(
             "Contract",
-            [
-                "Month-to-month",
-                "One year",
-                "Two year",
-            ],
+            ["Month-to-month", "One year", "Two year"],
             key="shap_contract",
         )
-
         internet = c2.selectbox(
             "Internet Service",
-            [
-                "DSL",
-                "Fiber optic",
-                "No",
-            ],
+            ["DSL", "Fiber optic", "No"],
             key="shap_internet",
         )
-
         monthly = c3.number_input(
-            "Monthly Charges",
-            0.0,
-            300.0,
-            70.0,
+            "Monthly Charges", 0.0, 300.0, 70.0,
             key="shap_monthly",
         )
 
         total = c1.number_input(
-            "Total Charges",
-            0.0,
-            20000.0,
-            800.0,
+            "Total Charges", 0.0, 20000.0, 800.0,
             key="shap_total",
         )
-
         support = c2.selectbox(
             "Tech Support",
-            [
-                "Yes",
-                "No",
-                "No internet service",
-            ],
+            ["Yes", "No", "No internet service"],
             key="shap_support",
         )
-
         partner = c3.selectbox(
-            "Partner",
-            ["Yes", "No"],
-            key="shap_partner",
+            "Partner", ["Yes", "No"], key="shap_partner"
         )
 
         analyze = st.form_submit_button(
@@ -1239,11 +1281,7 @@ elif page == "SHAP Explainability":
 
         try:
 
-            result = api(
-                "POST",
-                "/explain",
-                json=payload,
-            )
+            result = api("POST", "/explain", json=payload)
 
             a, b = st.columns(2)
 
@@ -1251,24 +1289,10 @@ elif page == "SHAP Explainability":
                 "Churn probability",
                 f"{result['churn_probability']:.1%}",
             )
+            b.metric("Risk", result["risk_band"])
 
-            b.metric(
-                "Risk",
-                result["risk_band"],
-            )
-
-            explanations = pd.DataFrame(
-                result[
-                    "explanations"
-                ]
-            )
-
-            explanations = (
-                explanations
-                .sort_values(
-                    "shap_value"
-                )
-            )
+            explanations = pd.DataFrame(result["explanations"])
+            explanations = explanations.sort_values("shap_value")
 
             chart = px.bar(
                 explanations,
@@ -1277,17 +1301,19 @@ elif page == "SHAP Explainability":
                 orientation="h",
                 template="plotly_white",
                 title="Local SHAP contribution",
+                color="shap_value",
+                color_continuous_scale="RdBu_r",
             )
 
-            chart.add_vline(
-                x=0,
-                line_width=1,
+            chart.add_vline(x=0, line_width=1)
+
+            chart.update_layout(
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                coloraxis_showscale=False,
             )
 
-            st.plotly_chart(
-                chart,
-                use_container_width=True,
-            )
+            st.plotly_chart(chart, use_container_width=True)
 
             st.dataframe(
                 explanations,
@@ -1297,9 +1323,7 @@ elif page == "SHAP Explainability":
 
         except Exception as exc:
 
-            st.error(
-                f"Explainability failed: {exc}"
-            )
+            st.error(f"Explainability failed: {exc}")
 
 
 # ============================================================
@@ -1313,14 +1337,9 @@ elif page == "Batch Scoring":
         unsafe_allow_html=True,
     )
 
-    st.info(
-        "Upload a CSV containing customer feature columns."
-    )
+    st.info("Upload a CSV containing customer feature columns.")
 
-    upload = st.file_uploader(
-        "Customer dataset",
-        type=["csv"],
-    )
+    upload = st.file_uploader("Customer dataset", type=["csv"])
 
     if upload:
 
@@ -1338,9 +1357,7 @@ elif page == "Batch Scoring":
                 },
             )
 
-            data = pd.DataFrame(
-                result["rows"]
-            )
+            data = pd.DataFrame(result["rows"])
 
             c1, c2, c3 = st.columns(3)
 
@@ -1348,20 +1365,13 @@ elif page == "Batch Scoring":
                 "Customers scored",
                 f"{result['count']:,}",
             )
-
             c2.metric(
                 "Processing time",
                 f"{result['latency_ms']:.0f} ms",
             )
-
             c3.metric(
                 "High-risk customers",
-                int(
-                    (
-                        data["risk_band"]
-                        == "High"
-                    ).sum()
-                ),
+                int((data["risk_band"] == "High").sum()),
             )
 
             st.dataframe(
@@ -1372,21 +1382,15 @@ elif page == "Batch Scoring":
 
             st.download_button(
                 "Download scored dataset",
-                data=data.to_csv(
-                    index=False
-                ),
-                file_name=(
-                    "churn_scored.csv"
-                ),
+                data=data.to_csv(index=False),
+                file_name="churn_scored.csv",
                 mime="text/csv",
                 use_container_width=True,
             )
 
         except Exception as exc:
 
-            st.error(
-                f"Batch scoring failed: {exc}"
-            )
+            st.error(f"Batch scoring failed: {exc}")
 
 
 # ============================================================
@@ -1395,10 +1399,7 @@ elif page == "Batch Scoring":
 
 else:
 
-    metrics = api(
-        "GET",
-        "/metrics",
-    )
+    metrics = api("GET", "/metrics")
 
     st.markdown(
         '<div class="section-title">Model Governance</div>',
@@ -1432,17 +1433,14 @@ else:
         "Model version",
         governance.get("model_version", "3.0.0"),
     )
-
     c2.metric(
         "Model family",
         governance.get("model_family", "XGBoost"),
     )
-
     c3.metric(
         "CV folds",
         cv.get("folds", 5),
     )
-
     c4.metric(
         "Random state",
         governance.get("random_state", 42),
@@ -1505,6 +1503,8 @@ else:
             xaxis_title="",
             height=360,
             margin=dict(l=10, r=10, t=30, b=10),
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
         )
 
         st.plotly_chart(fig, use_container_width=True)
@@ -1553,9 +1553,7 @@ else:
 
     else:
 
-        st.info(
-            "No hyperparameters were reported by the backend."
-        )
+        st.info("No hyperparameters were reported by the backend.")
 
     # ---------------------------------------------------------
     # THRESHOLD POLICY
@@ -1570,33 +1568,18 @@ else:
 
         t1, t2, t3, t4 = st.columns(4)
 
-        t1.metric(
-            "Selected threshold",
-            f"{threshold_val:.2f}",
-        )
-
-        t2.metric(
-            "Business score",
-            f"{business:.4f}",
-        )
-
+        t1.metric("Selected threshold", f"{threshold_val:.2f}")
+        t2.metric("Business score", f"{business:.4f}")
         t3.metric(
             "Recall",
             f"{threshold_data.get('recall', 0):.2%}",
         )
-
         t4.metric(
             "Precision",
             f"{threshold_data.get('precision', 0):.2%}",
         )
 
-        profile_keys = [
-            "accuracy",
-            "precision",
-            "recall",
-            "f1",
-        ]
-
+        profile_keys = ["accuracy", "precision", "recall", "f1"]
         profile_present = [
             k for k in profile_keys if k in threshold_data
         ]
@@ -1636,6 +1619,8 @@ else:
                     height=380,
                     margin=dict(l=10, r=10, t=50, b=10),
                     title="Threshold policy metric profile",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    paper_bgcolor="rgba(0,0,0,0)",
                 )
 
                 st.plotly_chart(fig, use_container_width=True)
@@ -1663,6 +1648,8 @@ else:
                     margin=dict(l=10, r=10, t=50, b=10),
                     title="Relative composition of policy metrics",
                     showlegend=False,
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    paper_bgcolor="rgba(0,0,0,0)",
                 )
 
                 st.plotly_chart(fig, use_container_width=True)
@@ -1733,6 +1720,8 @@ else:
             yaxis_range=[0, 1.1],
             legend_title="",
             title="Model comparison across CV metrics",
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
         )
 
         st.plotly_chart(fig, use_container_width=True)
@@ -1756,16 +1745,14 @@ else:
 
         fig.update_layout(
             polar=dict(
-                radialaxis=dict(
-                    visible=True,
-                    range=[0, 1],
-                ),
+                radialaxis=dict(visible=True, range=[0, 1]),
             ),
             showlegend=True,
             template="plotly_white",
             height=460,
             margin=dict(l=40, r=40, t=50, b=40),
             title="Multi-metric model profile",
+            paper_bgcolor="rgba(0,0,0,0)",
         )
 
         st.plotly_chart(fig, use_container_width=True)
@@ -1778,10 +1765,7 @@ else:
 
     cfg1, cfg2, cfg3 = st.columns(3)
 
-    cfg1.metric(
-        "Folds",
-        cv.get("folds", 5),
-    )
+    cfg1.metric("Folds", cv.get("folds", 5))
 
     search_metric = cv.get("hyperparameter_search_metric") or "—"
 
@@ -1792,10 +1776,7 @@ else:
 
     scoring = cv.get("scoring", [])
 
-    cfg3.metric(
-        "Scoring metrics",
-        len(scoring),
-    )
+    cfg3.metric("Scoring metrics", len(scoring))
 
     if scoring:
 
