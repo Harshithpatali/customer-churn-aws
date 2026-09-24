@@ -714,6 +714,14 @@ def render_risk(probability, band):
     )
 
 
+def format_dataframe(df, format_dict):
+    """Apply formatting to a DataFrame safely."""
+    if df.empty:
+        return df
+    active_fmt = {k: v for k, v in format_dict.items() if k in df.columns}
+    return df.style.format(active_fmt, na_rep="")
+
+
 # ============================================================
 # HEALTH CHECK
 # ============================================================
@@ -790,10 +798,7 @@ with st.sidebar:
     else:
         st.error("API OFFLINE")
 
-    st.caption(
-        f"Backend: `{BACKEND_URL}`  \n"
-        f"Timeout: `{TIMEOUT}s`"
-    )
+    # Removed the backend URL caption as requested
 
 
 # ============================================================
@@ -962,6 +967,19 @@ elif page == "Statistical Evidence":
         statistical.get("logistic_inference", [])
     )
 
+    # Formatting dictionary for statistical tables
+    format_dict = {
+        "p_value": "{:.2e}",
+        "statistic": "{:.3f}",
+        "cramers_v": "{:.3f}",
+        "median_difference": "{:.3f}",
+        "odds_ratio": "{:.3f}",
+        "ci_lower": "{:.3f}",
+        "ci_upper": "{:.3f}",
+        "coef": "{:.3f}",
+        "std_err": "{:.3f}",
+    }
+
     tab1, tab2, tab3 = st.tabs(
         [
             "Categorical associations",
@@ -975,7 +993,7 @@ elif page == "Statistical Evidence":
         if not categorical.empty:
 
             st.dataframe(
-                categorical,
+                format_dataframe(categorical, format_dict),
                 use_container_width=True,
                 hide_index=True,
             )
@@ -1003,7 +1021,7 @@ elif page == "Statistical Evidence":
         if not numeric.empty:
 
             st.dataframe(
-                numeric,
+                format_dataframe(numeric, format_dict),
                 use_container_width=True,
                 hide_index=True,
             )
@@ -1030,13 +1048,8 @@ elif page == "Statistical Evidence":
 
         if not odds.empty:
 
-            display = odds.copy()
-            display["odds_ratio"] = display["odds_ratio"].round(3)
-            display["ci_lower"] = display["ci_lower"].round(3)
-            display["ci_upper"] = display["ci_upper"].round(3)
-
             st.dataframe(
-                display,
+                format_dataframe(odds, format_dict),
                 use_container_width=True,
                 hide_index=True,
             )
@@ -1321,7 +1334,7 @@ elif page == "SHAP Explainability":
             st.plotly_chart(chart, use_container_width=True)
 
             st.dataframe(
-                explanations,
+                format_dataframe(explanations, {"shap_value": "{:.4f}"}),
                 use_container_width=True,
                 hide_index=True,
             )
