@@ -54,34 +54,39 @@ st.markdown(
 <style>
 
 /* ------------------------------------------------------------
-   SAFETY: never hide the sidebar or its toggle
+   SAFE CHROME HIDING (Preserves sidebar toggle)
    ------------------------------------------------------------ */
 
-/* Hide only the toolbar/menu chrome, NOT the sidebar toggle */
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
-header [data-testid="stToolbar"] { visibility: hidden; }
-header [data-testid="stStatusWidget"] { visibility: hidden; }
+.stDeployButton { display: none; }
 
-/* Force sidebar + its collapsed control to stay visible */
-[data-testid="stSidebar"],
-[data-testid="stSidebarContent"],
-[data-testid="stSidebarNav"],
-[data-testid="collapsedControl"],
-[data-testid="stSidebarCollapsedControl"],
-[data-testid="stSidebarCollapseButton"] {
+/* ------------------------------------------------------------
+   SIDEBAR SAFETY NET (Forces sidebar to stay visible)
+   ------------------------------------------------------------ */
+
+section[data-testid="stSidebar"] {
+    display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    display: revert !important;
+    min-width: 300px !important;
+    max-width: 400px !important;
+    transform: none !important;
+    left: 0 !important;
     z-index: 9999 !important;
 }
 
-[data-testid="collapsedControl"] button,
-[data-testid="stSidebarCollapsedControl"] button,
-[data-testid="stSidebarCollapseButton"] button {
+[data-testid="collapsedControl"],
+[data-testid="stSidebarCollapsedControl"] {
+    display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    display: inline-flex !important;
+    z-index: 999999 !important;
+}
+
+[data-testid="stSidebarCollapseButton"] {
+    display: flex !important;
+    visibility: visible !important;
 }
 
 /* ------------------------------------------------------------
