@@ -1,55 +1,592 @@
 {
   "dataset_rows": 7043,
   "churn_rate": 0.2653698707936959,
+  "feature_count": 26,
+  "transformed_feature_count": 56,
   "comparison": {
     "logistic_regression": {
-      "roc_auc": 0.8461520576610091,
-      "pr_auc": 0.6624521997597345,
-      "accuracy": 0.7402413058907026,
-      "precision": 0.5068027210884354,
-      "recall": 0.7967914438502673,
-      "f1": 0.6195426195426196
-    },
-    "random_forest": {
-      "roc_auc": 0.8226045622465059,
-      "pr_auc": 0.6159723061626237,
-      "accuracy": 0.7665010645848119,
-      "precision": 0.5524475524475524,
-      "recall": 0.6336898395721925,
-      "f1": 0.5902864259028643
+      "roc_auc": 0.8460254721124287,
+      "pr_auc": 0.6619726572445077,
+      "brier_score": 0.1647075507593974,
+      "accuracy": 0.7423704755145494,
+      "precision": 0.5093696763202725,
+      "recall": 0.7994652406417112,
+      "f1": 0.6222684703433923
     },
     "xgboost": {
-      "roc_auc": 0.83935260533726,
-      "pr_auc": 0.6509646116643418,
-      "accuracy": 0.7955997161107168,
-      "precision": 0.6396103896103896,
-      "recall": 0.5267379679144385,
-      "f1": 0.5777126099706745
+      "roc_auc": 0.8396135265700483,
+      "pr_auc": 0.646530324980204,
+      "brier_score": 0.13836878538131714,
+      "accuracy": 0.7963094393186657,
+      "precision": 0.6426229508196721,
+      "recall": 0.5240641711229946,
+      "f1": 0.5773195876288659
     }
   },
   "best_params": {
-    "model__subsample": 0.75,
-    "model__min_child_weight": 5,
-    "model__max_depth": 5,
-    "model__learning_rate": 0.025,
-    "model__colsample_bytree": 0.75
+    "model__subsample": 0.85,
+    "model__min_child_weight": 3,
+    "model__max_depth": 4,
+    "model__learning_rate": 0.02,
+    "model__colsample_bytree": 1.0
   },
+  "best_cv_average_precision": 0.6670745029337815,
   "test": {
-    "roc_auc": 0.8402232039060683,
-    "pr_auc": 0.6452636607217175,
-    "accuracy": 0.7175301632363378,
-    "precision": 0.4815950920245399,
-    "recall": 0.839572192513369,
-    "f1": 0.6120857699805068
+    "roc_auc": 0.842900875765326,
+    "pr_auc": 0.653878092576806,
+    "brier_score": 0.13658931851387024,
+    "accuracy": 0.6430092264017033,
+    "precision": 0.42162818955042525,
+    "recall": 0.9278074866310161,
+    "f1": 0.5797827903091061
   },
   "threshold_selection": {
-    "roc_auc": 0.8402232039060683,
-    "pr_auc": 0.6452636607217175,
-    "accuracy": 0.7175301632363378,
-    "precision": 0.4815950920245399,
-    "recall": 0.839572192513369,
-    "f1": 0.6120857699805068,
-    "threshold": 0.2,
-    "business_score": 0.6963813523178374
+    "roc_auc": 0.842900875765326,
+    "pr_auc": 0.653878092576806,
+    "brier_score": 0.13658931851387024,
+    "accuracy": 0.6430092264017033,
+    "precision": 0.42162818955042525,
+    "recall": 0.9278074866310161,
+    "f1": 0.5797827903091061,
+    "threshold": 0.11,
+    "business_score": 0.7506447326528093
+  },
+  "cv": {
+    "folds": 5,
+    "scoring": [
+      "roc_auc",
+      "pr_auc",
+      "f1",
+      "accuracy",
+      "brier"
+    ],
+    "hyperparameter_search_metric": "average_precision",
+    "models": {
+      "logistic_regression": {
+        "folds": 5,
+        "roc_auc_mean": 0.8479093839660992,
+        "roc_auc_std": 0.011034354785089576,
+        "pr_auc_mean": 0.6668122093552838,
+        "pr_auc_std": 0.01493112599449538,
+        "f1_mean": 0.6287056279131351,
+        "f1_std": 0.02078677096899072,
+        "accuracy_mean": 0.7525770644963522,
+        "accuracy_std": 0.012740818162897218,
+        "brier_mean": 0.1626738991905785,
+        "brier_std": 0.005073954157943091
+      },
+      "xgboost": {
+        "folds": 5,
+        "roc_auc_mean": 0.8441870405474706,
+        "roc_auc_std": 0.010077158950255858,
+        "pr_auc_mean": 0.6576622273130244,
+        "pr_auc_std": 0.020454044704985276,
+        "f1_mean": 0.578519224919858,
+        "f1_std": 0.029686408007740545,
+        "accuracy_mean": 0.7994342010493286,
+        "accuracy_std": 0.01402264631168209,
+        "brier_mean": 0.13620010614395142,
+        "brier_std": 0.005251285495271096
+      },
+      "xgboost_tuned": {
+        "folds": 5,
+        "roc_auc_mean": 0.8479331260363896,
+        "roc_auc_std": 0.010128472414111184,
+        "pr_auc_mean": 0.6670745029337815,
+        "pr_auc_std": 0.02066118021742668,
+        "f1_mean": 0.5839010154560703,
+        "f1_std": 0.02612448949587882,
+        "accuracy_mean": 0.8026285222560722,
+        "accuracy_std": 0.011699814279109868,
+        "brier_mean": 0.13427703976631164,
+        "brier_std": 0.005036555321744307
+      }
+    }
+  },
+  "model_governance": {
+    "model_family": "XGBoost",
+    "model_version": "3.0.0",
+    "random_state": 42,
+    "train_test_split": 0.8,
+    "test_size": 0.2,
+    "stratified": true
+  },
+  "statistical_model": {
+    "summary": {
+      "sample_size": 7043,
+      "churn_rate": 0.2653698707936959,
+      "categorical_tests": 16,
+      "numeric_tests": 10,
+      "significant_categorical": 14,
+      "significant_numeric": 10,
+      "logit_significant_terms": 10,
+      "logit_aic": 5877.325466068804
+    },
+    "categorical_tests": [
+      {
+        "feature": "Contract",
+        "test": "Chi-square",
+        "statistic": 1184.5965720837926,
+        "p_value": 5.863038300673391e-258,
+        "degrees_of_freedom": 2,
+        "cramers_v": 0.4101156965761409,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "tenure_group",
+        "test": "Chi-square",
+        "statistic": 927.3292745565151,
+        "p_value": 1.9959341029565844e-199,
+        "degrees_of_freedom": 4,
+        "cramers_v": 0.362859201765909,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "OnlineSecurity",
+        "test": "Chi-square",
+        "statistic": 849.9989679615965,
+        "p_value": 2.6611496351765517e-185,
+        "degrees_of_freedom": 2,
+        "cramers_v": 0.3474004326740552,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "TechSupport",
+        "test": "Chi-square",
+        "statistic": 828.1970684587394,
+        "p_value": 1.4430840279998987e-180,
+        "degrees_of_freedom": 2,
+        "cramers_v": 0.3429161982469257,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "InternetService",
+        "test": "Chi-square",
+        "statistic": 732.309589667794,
+        "p_value": 9.571788222840544e-160,
+        "degrees_of_freedom": 2,
+        "cramers_v": 0.32245455521230887,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "PaymentMethod",
+        "test": "Chi-square",
+        "statistic": 648.1423274814,
+        "p_value": 3.6823546520097993e-140,
+        "degrees_of_freedom": 3,
+        "cramers_v": 0.30335862555407056,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "OnlineBackup",
+        "test": "Chi-square",
+        "statistic": 601.812790113409,
+        "p_value": 2.0797592160864276e-131,
+        "degrees_of_freedom": 2,
+        "cramers_v": 0.2923155121954445,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "DeviceProtection",
+        "test": "Chi-square",
+        "statistic": 558.419369407389,
+        "p_value": 5.505219496457244e-122,
+        "degrees_of_freedom": 2,
+        "cramers_v": 0.281579732968073,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "StreamingMovies",
+        "test": "Chi-square",
+        "statistic": 375.6614793452656,
+        "p_value": 2.667756755723681e-82,
+        "degrees_of_freedom": 2,
+        "cramers_v": 0.23095080906926801,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "StreamingTV",
+        "test": "Chi-square",
+        "statistic": 374.2039433109813,
+        "p_value": 5.528994485739183e-82,
+        "degrees_of_freedom": 2,
+        "cramers_v": 0.2305023384466809,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "PaperlessBilling",
+        "test": "Chi-square",
+        "statistic": 258.27764906707307,
+        "p_value": 4.073354668665985e-58,
+        "degrees_of_freedom": 1,
+        "cramers_v": 0.19149814355338285,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "Dependents",
+        "test": "Chi-square",
+        "statistic": 189.12924940423474,
+        "p_value": 4.9249216612154196e-43,
+        "degrees_of_freedom": 1,
+        "cramers_v": 0.1638703967886369,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "Partner",
+        "test": "Chi-square",
+        "statistic": 158.7333820309922,
+        "p_value": 2.1399113440759935e-36,
+        "degrees_of_freedom": 1,
+        "cramers_v": 0.15012578474988478,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "MultipleLines",
+        "test": "Chi-square",
+        "statistic": 11.33044148319756,
+        "p_value": 0.0034643829548773,
+        "degrees_of_freedom": 2,
+        "cramers_v": 0.04010925283378871,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "PhoneService",
+        "test": "Chi-square",
+        "statistic": 0.9150329892546948,
+        "p_value": 0.3387825358066928,
+        "degrees_of_freedom": 1,
+        "cramers_v": 0.011398285522718045,
+        "significant_at_0_05": false
+      },
+      {
+        "feature": "gender",
+        "test": "Chi-square",
+        "statistic": 0.4840828822091383,
+        "p_value": 0.48657873605618596,
+        "degrees_of_freedom": 1,
+        "cramers_v": 0.008290505631771371,
+        "significant_at_0_05": false
+      }
+    ],
+    "numeric_tests": [
+      {
+        "feature": "monthly_to_tenure_value",
+        "test": "Mann-Whitney U",
+        "statistic": 1936464.5,
+        "p_value": 0.0,
+        "non_churn_median": 1.628598484848485,
+        "churn_median": 6.708333333333333,
+        "median_difference": 5.079734848484848,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "contract_risk_flag",
+        "test": "Mann-Whitney U",
+        "statistic": 2628208.0,
+        "p_value": 2.653452367628456e-253,
+        "non_churn_median": 0.0,
+        "churn_median": 1.0,
+        "median_difference": 1.0,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "tenure",
+        "test": "Mann-Whitney U",
+        "statistic": 7154668.0,
+        "p_value": 2.419635517951866e-208,
+        "non_churn_median": 38.0,
+        "churn_median": 10.0,
+        "median_difference": -28.0,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "support_gap_flag",
+        "test": "Mann-Whitney U",
+        "statistic": 2988532.5,
+        "p_value": 3.1337709543093257e-176,
+        "non_churn_median": 0.0,
+        "churn_median": 1.0,
+        "median_difference": 1.0,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "fiber_risk_flag",
+        "test": "Mann-Whitney U",
+        "statistic": 3160929.5,
+        "p_value": 2.564395341963841e-147,
+        "non_churn_median": 0.0,
+        "churn_median": 1.0,
+        "median_difference": 1.0,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "TotalCharges",
+        "test": "Mann-Whitney U",
+        "statistic": 6288982.0,
+        "p_value": 1.9959848938845826e-84,
+        "non_churn_median": 1683.6,
+        "churn_median": 703.55,
+        "median_difference": -980.05,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "MonthlyCharges",
+        "test": "Mann-Whitney U",
+        "statistic": 3667080.5,
+        "p_value": 3.311627651988584e-54,
+        "non_churn_median": 64.42500000000001,
+        "churn_median": 79.65,
+        "median_difference": 15.224999999999994,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "avg_monthly_revenue",
+        "test": "Mann-Whitney U",
+        "statistic": 3661261.0,
+        "p_value": 5.338762835679453e-54,
+        "non_churn_median": 64.04038461538461,
+        "churn_median": 79.3125,
+        "median_difference": 15.27211538461539,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "SeniorCitizen",
+        "test": "Mann-Whitney U",
+        "statistic": 4226068.0,
+        "p_value": 9.588356641599048e-37,
+        "non_churn_median": 0.0,
+        "churn_median": 0.0,
+        "median_difference": 0.0,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "service_count",
+        "test": "Mann-Whitney U",
+        "statistic": 5196730.5,
+        "p_value": 9.116689311435261e-07,
+        "non_churn_median": 3.0,
+        "churn_median": 2.0,
+        "median_difference": -1.0,
+        "significant_at_0_05": true
+      }
+    ],
+    "logistic_inference": [
+      {
+        "feature": "tenure",
+        "coefficient": -0.0594086967866124,
+        "odds_ratio": 0.9423215666507025,
+        "p_value": 4.952632498925635e-22,
+        "ci_lower": 0.9310187447885967,
+        "ci_upper": 0.9537616078574904,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "Contract_Two year",
+        "coefficient": -1.3895819403171312,
+        "odds_ratio": 0.24917945474349742,
+        "p_value": 2.6919995455619187e-15,
+        "ci_lower": 0.1765519365516071,
+        "ci_upper": 0.351683486904814,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "Contract_One year",
+        "coefficient": -0.6671189434342852,
+        "odds_ratio": 0.5131849649004735,
+        "p_value": 5.382118983760889e-10,
+        "ci_lower": 0.4157152904129019,
+        "ci_upper": 0.633507629556574,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "PaperlessBilling_Yes",
+        "coefficient": 0.34184560080535376,
+        "odds_ratio": 1.4075429572369251,
+        "p_value": 4.422670853767791e-06,
+        "ci_lower": 1.2163926964088714,
+        "ci_upper": 1.6287315620327651,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "TotalCharges",
+        "coefficient": 0.00031843845647555233,
+        "odds_ratio": 1.000318489163383,
+        "p_value": 5.542116959127962e-06,
+        "ci_lower": 1.0001810769000306,
+        "ci_upper": 1.000455920305447,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "PaymentMethod_Electronic check",
+        "coefficient": 0.305730625639058,
+        "odds_ratio": 1.357616550196799,
+        "p_value": 0.0012131923588998496,
+        "ci_lower": 1.128109856121147,
+        "ci_upper": 1.633814904964651,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "SeniorCitizen",
+        "coefficient": 0.21507703403894138,
+        "odds_ratio": 1.2399574122146302,
+        "p_value": 0.010942513578522916,
+        "ci_lower": 1.0506515987791267,
+        "ci_upper": 1.4633722405149283,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "MultipleLines_Yes",
+        "coefficient": 0.4469108525490288,
+        "odds_ratio": 1.563474913270381,
+        "p_value": 0.01159791880796947,
+        "ci_lower": 1.1050505432356152,
+        "ci_upper": 2.2120742072741795,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "InternetService_No",
+        "coefficient": -1.790960750876058,
+        "odds_ratio": 0.16679983956874012,
+        "p_value": 0.026390563721468193,
+        "ci_lower": 0.03432627174931681,
+        "ci_upper": 0.8105216518514329,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "InternetService_Fiber optic",
+        "coefficient": 1.7529591939935838,
+        "odds_ratio": 5.7716568825878065,
+        "p_value": 0.027956996707071743,
+        "ci_lower": 1.208960441828942,
+        "ci_upper": 27.554270609489958,
+        "significant_at_0_05": true
+      },
+      {
+        "feature": "StreamingMovies_Yes",
+        "coefficient": 0.6038059417340886,
+        "odds_ratio": 1.829066892006274,
+        "p_value": 0.06433405352194208,
+        "ci_lower": 0.964698744328295,
+        "ci_upper": 3.467907173200377,
+        "significant_at_0_05": false
+      },
+      {
+        "feature": "StreamingTV_Yes",
+        "coefficient": 0.5911884911316856,
+        "odds_ratio": 1.8061337142130076,
+        "p_value": 0.06987726678873664,
+        "ci_lower": 0.9531087048117509,
+        "ci_upper": 3.4226095902263083,
+        "significant_at_0_05": false
+      },
+      {
+        "feature": "Dependents_Yes",
+        "coefficient": -0.15376783428116927,
+        "odds_ratio": 0.8574710732921128,
+        "p_value": 0.08653115373919759,
+        "ci_lower": 0.7192090905350365,
+        "ci_upper": 1.022312775532013,
+        "significant_at_0_05": false
+      },
+      {
+        "feature": "const",
+        "coefficient": 1.151182065178395,
+        "odds_ratio": 3.161928306861479,
+        "p_value": 0.15762002519658602,
+        "ci_lower": 0.6405176527650249,
+        "ci_upper": 15.608922836978557,
+        "significant_at_0_05": false
+      },
+      {
+        "feature": "MonthlyCharges",
+        "coefficient": -0.040371855524903286,
+        "odds_ratio": 0.9604322307101882,
+        "p_value": 0.2032615028965945,
+        "ci_lower": 0.9025207881938483,
+        "ci_upper": 1.022059637687618,
+        "significant_at_0_05": false
+      },
+      {
+        "feature": "OnlineSecurity_Yes",
+        "coefficient": -0.20546439148047513,
+        "odds_ratio": 0.8142690889676798,
+        "p_value": 0.2500454748446661,
+        "ci_lower": 0.5737462775983274,
+        "ci_upper": 1.1556225724438376,
+        "significant_at_0_05": false
+      },
+      {
+        "feature": "TechSupport_Yes",
+        "coefficient": -0.17889572719616603,
+        "odds_ratio": 0.8361930870490393,
+        "p_value": 0.32150629694447186,
+        "ci_lower": 0.5870894007774324,
+        "ci_upper": 1.190992168999621,
+        "significant_at_0_05": false
+      },
+      {
+        "feature": "DeviceProtection_Yes",
+        "coefficient": 0.14768896228036144,
+        "odds_ratio": 1.1591523001982091,
+        "p_value": 0.4021969375139136,
+        "ci_lower": 0.8204873757440696,
+        "ci_upper": 1.6376047880521103,
+        "significant_at_0_05": false
+      },
+      {
+        "feature": "PaymentMethod_Credit card (automatic)",
+        "coefficient": -0.08649311693050639,
+        "odds_ratio": 0.9171418615141484,
+        "p_value": 0.44835477129582757,
+        "ci_lower": 0.733379962731258,
+        "ci_upper": 1.1469486990195705,
+        "significant_at_0_05": false
+      },
+      {
+        "feature": "PaymentMethod_Mailed check",
+        "coefficient": -0.05666198099168176,
+        "odds_ratio": 0.9449134140863661,
+        "p_value": 0.6217622559240332,
+        "ci_lower": 0.7544511185890426,
+        "ci_upper": 1.183458196456997,
+        "significant_at_0_05": false
+      },
+      {
+        "feature": "gender_Male",
+        "coefficient": -0.021882332929303968,
+        "odds_ratio": 0.9783553484865031,
+        "p_value": 0.7355757321998462,
+        "ci_lower": 0.8616745754699349,
+        "ci_upper": 1.110836057092814,
+        "significant_at_0_05": false
+      },
+      {
+        "feature": "PhoneService_Yes",
+        "coefficient": 0.17980912123574483,
+        "odds_ratio": 1.1969888615597344,
+        "p_value": 0.7813808260178214,
+        "ci_lower": 0.3361899225900857,
+        "ci_upper": 4.261824160758834,
+        "significant_at_0_05": false
+      },
+      {
+        "feature": "OnlineBackup_Yes",
+        "coefficient": 0.025791495900060267,
+        "odds_ratio": 1.0261269744857515,
+        "p_value": 0.8829760123031899,
+        "ci_lower": 0.7278742044590488,
+        "ci_upper": 1.4465914045543313,
+        "significant_at_0_05": false
+      },
+      {
+        "feature": "Partner_Yes",
+        "coefficient": -0.002692068184908204,
+        "odds_ratio": 0.9973115521811617,
+        "p_value": 0.9723926760581907,
+        "ci_lower": 0.8562827603573951,
+        "ci_upper": 1.161567624809893,
+        "significant_at_0_05": false
+      }
+    ]
   }
 }

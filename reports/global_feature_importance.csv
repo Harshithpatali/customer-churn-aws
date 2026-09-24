@@ -1,0 +1,57 @@
+feature,importance
+num__contract_risk_flag,0.43000177
+num__fiber_risk_flag,0.119861305
+num__monthly_to_tenure_value,0.036456898
+cat__OnlineSecurity_No,0.03497924
+cat__Contract_Two year,0.024753999
+num__support_gap_flag,0.024058022
+cat__PaperlessBilling_No,0.023309417
+cat__PaymentMethod_Electronic check,0.019701457
+cat__StreamingMovies_Yes,0.01926599
+cat__PhoneService_No,0.017217172
+cat__Contract_One year,0.017084464
+cat__MultipleLines_No,0.015561572
+cat__OnlineBackup_No,0.011224834
+num__MonthlyCharges,0.010996476
+cat__StreamingTV_No,0.010817823
+cat__OnlineSecurity_Yes,0.0098648975
+num__TotalCharges,0.009733917
+cat__Dependents_No,0.009686931
+num__tenure,0.008966174
+num__avg_monthly_revenue,0.008958054
+num__SeniorCitizen,0.008866414
+cat__OnlineBackup_Yes,0.008598303
+cat__PaymentMethod_Mailed check,0.008496463
+cat__InternetService_DSL,0.008384984
+num__service_count,0.008356025
+cat__gender_Female,0.008279881
+cat__StreamingTV_Yes,0.008206784
+cat__DeviceProtection_No,0.008092667
+cat__tenure_group_13-24,0.007965036
+cat__TechSupport_Yes,0.007758075
+cat__PaymentMethod_Bank transfer (automatic),0.0076783434
+cat__PaymentMethod_Credit card (automatic),0.0073674326
+cat__StreamingMovies_No,0.0073666517
+cat__tenure_group_25-48,0.0073384126
+cat__DeviceProtection_Yes,0.0064936928
+cat__tenure_group_7-12,0.0062417043
+cat__MultipleLines_Yes,0.0060645845
+cat__Partner_No,0.005944152
+cat__TechSupport_No internet service,0.0
+cat__MultipleLines_No phone service,0.0
+cat__tenure_group_49-72,0.0
+cat__gender_Male,0.0
+cat__tenure_group_0-6,0.0
+cat__Partner_Yes,0.0
+cat__Dependents_Yes,0.0
+cat__PhoneService_Yes,0.0
+cat__PaperlessBilling_Yes,0.0
+cat__StreamingTV_No internet service,0.0
+cat__InternetService_Fiber optic,0.0
+cat__InternetService_No,0.0
+cat__Contract_Month-to-month,0.0
+cat__OnlineSecurity_No internet service,0.0
+cat__StreamingMovies_No internet service,0.0
+cat__DeviceProtection_No internet service,0.0
+cat__TechSupport_No,0.0
+cat__OnlineBackup_No internet service,0.0

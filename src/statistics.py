@@ -1,117 +1,581 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-from scipy.stats import chi2_contingency, mannwhitneyu
+from scipy.stats import (
+    chi2_contingency,
+    mannwhitneyu,
+)
+
 
 TARGET = "Churn"
 
 
-def _effect_size_chi2(stat: float, n: int, r: int, k: int) -> float:
-    return float(np.sqrt(stat / max(n * max(min(r - 1, k - 1), 1), 1)))
+def cramers_v(
+    statistic: float,
+    n: int,
+    rows: int,
+    columns: int,
+) -> float:
+
+    denominator = max(
+        n
+        * max(
+            min(
+                rows - 1,
+                columns - 1,
+            ),
+            1,
+        ),
+        1,
+    )
+
+    return float(
+        np.sqrt(
+            statistic
+            / denominator
+        )
+    )
 
 
-def categorical_tests(df: pd.DataFrame, target: str = TARGET) -> pd.DataFrame:
-    rows: list[dict[str, Any]] = []
+def categorical_tests(
+    df: pd.DataFrame,
+    target: str = TARGET,
+) -> pd.DataFrame:
+
+    rows = []
+
     categorical = [
-        c for c in df.select_dtypes(include=["object", "category"]).columns
-        if c not in {"customerID", target}
+        column
+        for column in df.select_dtypes(
+            include=[
+                "object",
+                "category",
+            ]
+        ).columns
+        if column not in {
+            "customerID",
+            target,
+        }
     ]
+
     for feature in categorical:
-        table = pd.crosstab(df[feature], df[target])
-        if table.shape[0] < 2 or table.shape[1] < 2:
+
+        table = pd.crosstab(
+            df[feature],
+            df[target],
+        )
+
+        if (
+            table.shape[0] < 2
+            or table.shape[1] < 2
+        ):
             continue
-        stat, p_value, dof, _ = chi2_contingency(table)
-        rows.append({
-            "feature": feature,
-            "test": "chi_square",
-            "statistic": float(stat),
-            "p_value": float(p_value),
-            "degrees_of_freedom": int(dof),
-            "cramers_v": _effect_size_chi2(stat, len(df), table.shape[0], table.shape[1]),
-            "significant_at_0_05": bool(p_value < 0.05),
-        })
-    return pd.DataFrame(rows).sort_values("p_value")
+
+        statistic, p_value, dof, _ = (
+            chi2_contingency(table)
+        )
+
+        rows.append(
+            {
+                "feature": feature,
+                "test": "Chi-square",
+                "statistic":
+                    float(statistic),
+                "p_value":
+                    float(p_value),
+                "degrees_of_freedom":
+                    int(dof),
+                "cramers_v":
+                    cramers_v(
+                        statistic,
+                        len(df),
+                        table.shape[0],
+                        table.shape[1],
+                    ),
+                "significant_at_0_05":
+                    bool(
+                        p_value < 0.05
+                    ),
+            }
+        )
+
+    if not rows:
+        return pd.DataFrame()
+
+    return (
+        pd.DataFrame(rows)
+        .sort_values(
+            "p_value"
+        )
+        .reset_index(
+            drop=True
+        )
+    )
 
 
-def numeric_tests(df: pd.DataFrame, target: str = TARGET) -> pd.DataFrame:
-    rows: list[dict[str, Any]] = []
-    numeric = [c for c in df.select_dtypes(include=np.number).columns if c != target]
-    for feature in numeric:
-        a = df.loc[df[target] == 0, feature].dropna()
-        b = df.loc[df[target] == 1, feature].dropna()
-        if len(a) == 0 or len(b) == 0:
-            continue
-        stat, p_value = mannwhitneyu(a, b, alternative="two-sided")
-        rows.append({
-            "feature": feature,
-            "test": "mann_whitney_u",
-            "statistic": float(stat),
-            "p_value": float(p_value),
-            "non_churn_median": float(a.median()),
-            "churn_median": float(b.median()),
-            "significant_at_0_05": bool(p_value < 0.05),
-        })
-    return pd.DataFrame(rows).sort_values("p_value")
+def numeric_tests(
+    df: pd.DataFrame,
+    target: str = TARGET,
+) -> pd.DataFrame:
 
+    rows = []
 
-def logistic_inference(df: pd.DataFrame, target: str = TARGET) -> pd.DataFrame:
-    work = df.copy()
-    numeric = ["SeniorCitizen", "tenure", "MonthlyCharges", "TotalCharges"]
-    categorical = [
-        c for c in [
-            "gender", "Partner", "Dependents", "PhoneService", "MultipleLines",
-            "InternetService", "OnlineSecurity", "OnlineBackup", "DeviceProtection",
-            "TechSupport", "StreamingTV", "StreamingMovies", "Contract",
-            "PaperlessBilling", "PaymentMethod",
-        ] if c in work
+    numeric = [
+        column
+        for column in df.select_dtypes(
+            include=np.number
+        ).columns
+        if column != target
     ]
-    x = pd.get_dummies(work[numeric + categorical], columns=categorical, drop_first=True, dtype=float)
-    x = x.replace([np.inf, -np.inf], np.nan).fillna(x.median(numeric_only=True)).fillna(0)
-    y = work[target].astype(int)
-    x = sm.add_constant(x, has_constant="add")
-    model = sm.Logit(y, x).fit(disp=False, maxiter=300)
-    conf = model.conf_int()
-    return pd.DataFrame({
-        "feature": model.params.index,
-        "coefficient": model.params.values,
-        "odds_ratio": np.exp(model.params.values),
-        "p_value": model.pvalues.values,
-        "ci_lower": np.exp(conf[0].values),
-        "ci_upper": np.exp(conf[1].values),
-    }).sort_values("p_value")
 
+    for feature in numeric:
 
-def run_statistical_analysis(df: pd.DataFrame, output_dir: Path) -> dict[str, Any]:
-    output_dir.mkdir(parents=True, exist_ok=True)
-    cat = categorical_tests(df)
-    num = numeric_tests(df)
-    odds = logistic_inference(df)
-    cat.to_csv(output_dir / "categorical_significance.csv", index=False)
-    num.to_csv(output_dir / "numeric_significance.csv", index=False)
-    odds.to_csv(output_dir / "statistical_logit_odds_ratios.csv", index=False)
-    summary = {
-        "sample_size": int(len(df)),
-        "churn_rate": float(df[TARGET].mean()),
-        "categorical_tests": int(len(cat)),
-        "numeric_tests": int(len(num)),
-        "significant_categorical": int(cat["significant_at_0_05"].sum()) if not cat.empty else 0,
-        "significant_numeric": int(num["significant_at_0_05"].sum()) if not num.empty else 0,
-        "logit_aic": float(sm.Logit(
-            df[TARGET].astype(int),
-            sm.add_constant(
-                pd.get_dummies(
-                    df.drop(columns=["customerID", TARGET]),
-                    drop_first=True,
-                    dtype=float
-                ).replace([np.inf, -np.inf], np.nan).fillna(0),
-                has_constant="add"
+        non_churn = (
+            df.loc[
+                df[target] == 0,
+                feature,
+            ]
+            .dropna()
+        )
+
+        churn = (
+            df.loc[
+                df[target] == 1,
+                feature,
+            ]
+            .dropna()
+        )
+
+        if (
+            len(non_churn) == 0
+            or len(churn) == 0
+        ):
+            continue
+
+        statistic, p_value = (
+            mannwhitneyu(
+                non_churn,
+                churn,
+                alternative="two-sided",
             )
-        ).fit(disp=False, maxiter=300).aic),
+        )
+
+        rows.append(
+            {
+                "feature": feature,
+                "test":
+                    "Mann-Whitney U",
+                "statistic":
+                    float(statistic),
+                "p_value":
+                    float(p_value),
+                "non_churn_median":
+                    float(
+                        non_churn.median()
+                    ),
+                "churn_median":
+                    float(
+                        churn.median()
+                    ),
+                "median_difference":
+                    float(
+                        churn.median()
+                        - non_churn.median()
+                    ),
+                "significant_at_0_05":
+                    bool(
+                        p_value < 0.05
+                    ),
+            }
+        )
+
+    if not rows:
+        return pd.DataFrame()
+
+    return (
+        pd.DataFrame(rows)
+        .sort_values(
+            "p_value"
+        )
+        .reset_index(
+            drop=True
+        )
+    )
+
+
+def prepare_logistic_data(
+    df: pd.DataFrame,
+    target: str = TARGET,
+):
+
+    numeric = [
+        "SeniorCitizen",
+        "tenure",
+        "MonthlyCharges",
+        "TotalCharges",
+    ]
+
+    categorical = [
+        column
+        for column in [
+            "gender",
+            "Partner",
+            "Dependents",
+            "PhoneService",
+            "MultipleLines",
+            "InternetService",
+            "OnlineSecurity",
+            "OnlineBackup",
+            "DeviceProtection",
+            "TechSupport",
+            "StreamingTV",
+            "StreamingMovies",
+            "Contract",
+            "PaperlessBilling",
+            "PaymentMethod",
+        ]
+        if column in df.columns
+    ]
+
+    X = pd.get_dummies(
+        df[
+            numeric + categorical
+        ],
+        columns=categorical,
+        drop_first=True,
+        dtype=float,
+    )
+
+    X = X.replace(
+        [np.inf, -np.inf],
+        np.nan,
+    )
+
+    X = X.fillna(
+        X.median()
+    )
+
+    X = X.fillna(0)
+
+    # Remove zero-variance columns.
+    variance = X.var()
+
+    X = X.loc[
+        :,
+        variance > 1e-12,
+    ]
+
+    # Remove duplicate columns.
+    X = X.T.drop_duplicates().T
+
+    # Remove columns that are perfectly
+    # correlated with another column.
+    correlation = X.corr().abs()
+
+    upper = correlation.where(
+        np.triu(
+            np.ones(
+                correlation.shape,
+                dtype=bool,
+            ),
+            k=1,
+        )
+    )
+
+    to_drop = [
+        column
+        for column in upper.columns
+        if any(
+            upper[column] > 0.999999
+        )
+    ]
+
+    if to_drop:
+        X = X.drop(
+            columns=to_drop
+        )
+
+    X = sm.add_constant(
+        X,
+        has_constant="add",
+    )
+
+    y = df[target].astype(int)
+
+    return X, y
+
+
+def logistic_inference(
+    df: pd.DataFrame,
+    target: str = TARGET,
+) -> pd.DataFrame:
+
+    X, y = prepare_logistic_data(
+        df,
+        target,
+    )
+
+    try:
+
+        model = sm.GLM(
+            y,
+            X,
+            family=sm.families.Binomial(),
+        ).fit(
+            disp=False
+        )
+
+        confidence = (
+            model.conf_int()
+        )
+
+        result = pd.DataFrame(
+            {
+                "feature":
+                    model.params.index,
+
+                "coefficient":
+                    model.params.values,
+
+                "odds_ratio":
+                    np.exp(
+                        model.params.values
+                    ),
+
+                "p_value":
+                    model.pvalues.values,
+
+                "ci_lower":
+                    np.exp(
+                        confidence[0].values
+                    ),
+
+                "ci_upper":
+                    np.exp(
+                        confidence[1].values
+                    ),
+            }
+        )
+
+        result[
+            "significant_at_0_05"
+        ] = (
+            result["p_value"]
+            < 0.05
+        )
+
+        return (
+            result
+            .sort_values(
+                "p_value"
+            )
+            .reset_index(
+                drop=True
+            )
+        )
+
+    except Exception as exc:
+
+        print(
+            "WARNING: Classical GLM "
+            f"inference failed: {exc}"
+        )
+
+        # Regularized GLM is used only as
+        # a numerical fallback. It provides
+        # stable coefficients but not valid
+        # classical p-values/confidence
+        # intervals.
+        model = sm.GLM(
+            y,
+            X,
+            family=sm.families.Binomial(),
+        ).fit_regularized(
+            alpha=0.01,
+            L1_wt=0.0,
+        )
+
+        coefficients = model.params
+
+        result = pd.DataFrame(
+            {
+                "feature":
+                    X.columns,
+
+                "coefficient":
+                    coefficients,
+
+                "odds_ratio":
+                    np.exp(
+                        coefficients
+                    ),
+
+                "p_value":
+                    np.nan,
+
+                "ci_lower":
+                    np.nan,
+
+                "ci_upper":
+                    np.nan,
+
+                "significant_at_0_05":
+                    False,
+            }
+        )
+
+        return result
+
+
+def model_aic(
+    df: pd.DataFrame,
+) -> float:
+
+    X, y = prepare_logistic_data(
+        df
+    )
+
+    try:
+
+        model = sm.GLM(
+            y,
+            X,
+            family=sm.families.Binomial(),
+        ).fit()
+
+        return float(
+            model.aic
+        )
+
+    except Exception:
+
+        return float("nan")
+
+
+def run_statistical_analysis(
+    df: pd.DataFrame,
+    output_dir: Path,
+) -> dict[str, Any]:
+
+    output_dir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    categorical = categorical_tests(
+        df
+    )
+
+    numeric = numeric_tests(
+        df
+    )
+
+    odds_ratios = logistic_inference(
+        df
+    )
+
+    categorical.to_csv(
+        output_dir
+        / "categorical_significance.csv",
+        index=False,
+    )
+
+    numeric.to_csv(
+        output_dir
+        / "numeric_significance.csv",
+        index=False,
+    )
+
+    odds_ratios.to_csv(
+        output_dir
+        / "statistical_logit_odds_ratios.csv",
+        index=False,
+    )
+
+    summary = {
+        "sample_size":
+            int(len(df)),
+
+        "churn_rate":
+            float(
+                df[TARGET].mean()
+            ),
+
+        "categorical_tests":
+            int(
+                len(categorical)
+            ),
+
+        "numeric_tests":
+            int(
+                len(numeric)
+            ),
+
+        "significant_categorical":
+            int(
+                categorical[
+                    "significant_at_0_05"
+                ].sum()
+            )
+            if not categorical.empty
+            else 0,
+
+        "significant_numeric":
+            int(
+                numeric[
+                    "significant_at_0_05"
+                ].sum()
+            )
+            if not numeric.empty
+            else 0,
+
+        "logit_significant_terms":
+            int(
+                odds_ratios[
+                    "significant_at_0_05"
+                ].sum()
+            )
+            if not odds_ratios.empty
+            else 0,
+
+        "logit_aic":
+            model_aic(df),
     }
-    (output_dir / "statistical_summary.json").write_text(__import__("json").dumps(summary, indent=2))
-    return summary
+
+    summary_path = (
+        output_dir
+        / "statistical_summary.json"
+    )
+
+    summary_path.write_text(
+        json.dumps(
+            summary,
+            indent=2,
+        )
+    )
+
+    return {
+        "summary":
+            summary,
+
+        "categorical_tests":
+            categorical.to_dict(
+                orient="records"
+            ),
+
+        "numeric_tests":
+            numeric.to_dict(
+                orient="records"
+            ),
+
+        "logistic_inference":
+            odds_ratios.to_dict(
+                orient="records"
+            ),
+    }

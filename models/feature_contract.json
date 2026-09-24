@@ -21,7 +21,11 @@
     "TotalCharges",
     "service_count",
     "tenure_group",
-    "monthly_to_tenure_value"
+    "monthly_to_tenure_value",
+    "avg_monthly_revenue",
+    "contract_risk_flag",
+    "fiber_risk_flag",
+    "support_gap_flag"
   ],
   "transformed_features": [
     "num__SeniorCitizen",
@@ -30,6 +34,10 @@
     "num__TotalCharges",
     "num__service_count",
     "num__monthly_to_tenure_value",
+    "num__avg_monthly_revenue",
+    "num__contract_risk_flag",
+    "num__fiber_risk_flag",
+    "num__support_gap_flag",
     "cat__gender_Female",
     "cat__gender_Male",
     "cat__Partner_No",
@@ -74,7 +82,16 @@
     "cat__tenure_group_0-6",
     "cat__tenure_group_13-24",
     "cat__tenure_group_25-48",
-    "cat__tenure_group_49+",
+    "cat__tenure_group_49-72",
     "cat__tenure_group_7-12"
+  ],
+  "engineered_features": [
+    "service_count",
+    "monthly_to_tenure_value",
+    "avg_monthly_revenue",
+    "contract_risk_flag",
+    "fiber_risk_flag",
+    "support_gap_flag",
+    "tenure_group"
   ]
 }

@@ -1,0 +1,12 @@
+{
+  "rows": 7043,
+  "columns": 21,
+  "duplicate_rows": 0,
+  "missing_cells": 0,
+  "missing_by_column": {},
+  "unique_customers": 7043,
+  "target_distribution": {
+    "No": 5174,
+    "Yes": 1869
+  }
+}

@@ -1,0 +1,11 @@
+feature,test,statistic,p_value,non_churn_median,churn_median,median_difference,significant_at_0_05
+monthly_to_tenure_value,Mann-Whitney U,1936464.5,0.0,1.628598484848485,6.708333333333333,5.079734848484848,True
+contract_risk_flag,Mann-Whitney U,2628208.0,2.653452367628456e-253,0.0,1.0,1.0,True
+tenure,Mann-Whitney U,7154668.0,2.419635517951866e-208,38.0,10.0,-28.0,True
+support_gap_flag,Mann-Whitney U,2988532.5,3.1337709543093257e-176,0.0,1.0,1.0,True
+fiber_risk_flag,Mann-Whitney U,3160929.5,2.564395341963841e-147,0.0,1.0,1.0,True
+TotalCharges,Mann-Whitney U,6288982.0,1.9959848938845826e-84,1683.6,703.55,-980.05,True
+MonthlyCharges,Mann-Whitney U,3667080.5,3.311627651988584e-54,64.42500000000001,79.65,15.224999999999994,True
+avg_monthly_revenue,Mann-Whitney U,3661261.0,5.338762835679453e-54,64.04038461538461,79.3125,15.27211538461539,True
+SeniorCitizen,Mann-Whitney U,4226068.0,9.588356641599048e-37,0.0,0.0,0.0,True
+service_count,Mann-Whitney U,5196730.5,9.116689311435261e-07,3.0,2.0,-1.0,True

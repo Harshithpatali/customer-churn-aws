@@ -1,0 +1,10 @@
+{
+  "sample_size": 7043,
+  "churn_rate": 0.2653698707936959,
+  "categorical_tests": 16,
+  "numeric_tests": 10,
+  "significant_categorical": 14,
+  "significant_numeric": 10,
+  "logit_significant_terms": 10,
+  "logit_aic": 5877.325466068804
+}
