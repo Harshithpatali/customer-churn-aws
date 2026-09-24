@@ -300,6 +300,19 @@ h3 {
 [data-testid="stSidebar"] .stRadio label:hover {
     background: var(--accent-soft);
 }
+[data-testid="collapsedControl"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 999999 !important;
+}
+
+
+[data-testid="collapsedControl"] button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
 
 /* ============================================================
    WIDGETS
